@@ -1,0 +1,56 @@
+#include <stdio.h>
+#include <stdlib.h>
+typedef enum { NUMBER, VARIABLE, LAMBDA, APPLY } ExprType;
+typedef struct Expr {
+    ExprType type;
+    int value;                 
+    char varName;               
+    struct Expr *param, *body;  
+    struct Expr *func, *arg;   
+} Expr;
+Expr *makeNumber(int value) {
+    Expr *e = (Expr *)malloc(sizeof(Expr));
+    e->type = NUMBER;
+    e->value = value;
+    return e;
+}
+Expr *makeVariable(char varName) {
+    Expr *e = (Expr *)malloc(sizeof(Expr));
+    e->type = VARIABLE;
+    e->varName = varName;
+    return e;
+}
+Expr *makeLambda(Expr *param, Expr *body) {
+    Expr *e = (Expr *)malloc(sizeof(Expr));
+    e->type = LAMBDA;
+    e->param = param;
+    e->body = body;
+    return e;
+}
+Expr *makeApply(Expr *func, Expr *arg) {
+    Expr *e = (Expr *)malloc(sizeof(Expr));
+    e->type = APPLY;
+    e->func = func;
+    e->arg = arg;
+    return e;
+}
+int interpret(Expr *expr) {
+    switch (expr->type) {
+        case NUMBER:
+            return expr->value;
+        case APPLY: {
+            int argValue = interpret(expr->arg);
+            return argValue + 1;  
+        }
+        default:
+            printf("Unsupported expression type!\n");
+            exit(1);
+    }
+}
+int main() {
+    Expr *lambdaExpr = makeLambda(makeVariable('x'), makeNumber(1));
+    Expr *applyExpr = makeApply(lambdaExpr, makeNumber(2));
+    int result = interpret(applyExpr);
+    printf("Result: %d\n", result); 
+    return 0;
+}
